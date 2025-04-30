@@ -20,23 +20,38 @@ emmagatzemar documents XML.
 */
 
 --Crear la taula ImatgesProducte(producte_id, descripcio, imatge BLOB, format)
-create or replace table  ImatgesProducte(
+create table ImatgesProducte(
 producte_id number primary key,
 descripcio varchar2(250),
-imatge BLOB,
+imatge BLOB DEFAULT EMPTY_BLOB(),
 format varchar2(250)
 );
-
+/
 --Crear la taula AudiosComanda(comanda_id, audio BLOB,durada_segons).
-create or replace table AudiosComanda(
+create table AudiosComanda(
 comanda_id number primary key,
-audio BLOB,
+audio BLOB DEFAULT EMPTY_BLOB(),
 durada_segons number(2)
 );
-
+/
 --Crear una funció xml_producte(producte_id) que generi un document XML amb les dades del producte i referències a les imatges relacionades
-CREATE OR REPLACE PROCEDURE load_doc (producte_id IN NUMBER) AS
+Create or replace procedure xml_producte (producte_id in number) as
+ v_file BFILE;
+ v_clo CLOB;
+BEGIN
+ v_file := BFILENAME('DOCS_DIR', 'xml_dades');
+ if dbms_lob.fileexists(v_file) = 1 Then
+    select contenido into v_clo from documentos where id = producte_id for update;
+    dmb_lob.open(v_file, dbms_lob.lob_readonly);
+    dmb_lob.loadfromfile(v_clo, v_file, dbms_lob.getlength(v_file));
+    dmb_lob.close(v_file);
+ end if;
+end;
+/
+ 
+CREATE OR REPLACE PROCEDURE load_doc (p_id IN NUMBER, p_file IN VARCHAR2) AS
   v_bfile BFILE;
+  v_clob CLOB;
 BEGIN
   v_bfile := BFILENAME('DOCS_DIR', p_file);
   IF DBMS_LOB.FILEEXISTS(v_bfile) = 1 THEN
@@ -46,6 +61,7 @@ BEGIN
     DBMS_LOB.CLOSE(v_bfile);
   END IF;
 END;
+--para llamar
 ?CALL load_doc(1, 'ia_articulo.txt');
 
 --Crear una taula DocumentsXML(id, xml_data XMLType) per emmagatzemar documents XML
@@ -53,3 +69,4 @@ create or replace table DocumentsXML(
 id number primary key,
 xml_data XMLType
 );
+/
