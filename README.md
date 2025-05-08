@@ -4,6 +4,6 @@
 Part1.1 Jordi
 Part1.2 Fiestas
 
-##Gestio contingut
+## Gestio contingut
 Part2.1 Carles
 Part2.2 Ya veremos
