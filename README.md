@@ -1,4 +1,6 @@
 # Practica_2
+X.1 SQL
+X.2 Python
 
 ## Control de coherencia
 Part1.1 Jordi
