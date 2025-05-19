@@ -1,3 +1,4 @@
+--Trigger validar_unitats que impedeixi inserir una línia de comanda amb més de 100 unitats.
 CREATE OR REPLACE TRIGGER skip_unitats_excedides
   BEFORE INSERT OR UPDATE
     ON COMANDES
@@ -20,6 +21,7 @@ BEGIN
 END;
 /
 
+--Crear una taula LogsPreus(id_log, producte_id, preu_antic, preu_nou, data_modificacio)
 CREATE TABLE LogsPreus (
   id_log            NUMBER        PRIMARY KEY,
   producte_codi     NUMBER        NOT NULL
@@ -29,6 +31,7 @@ CREATE TABLE LogsPreus (
   data_modificacio  DATE          DEFAULT SYSDATE
 );
 /
+
 --Es para hacer el siguiente valor se vaya sumando la id
 CREATE SEQUENCE seq_logspreus
   START WITH 1
@@ -37,6 +40,7 @@ CREATE SEQUENCE seq_logspreus
   NOCYCLE;
 /
 
+--Trigger log_preu_producte que enregistri cada canvi de preu.
 CREATE OR REPLACE TRIGGER log_preu_producte
   AFTER UPDATE OF preu
     ON PRODUCTES

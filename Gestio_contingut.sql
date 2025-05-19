@@ -96,9 +96,7 @@ EXCEPTION
 END xml_producte;
 /
 
---para llamar
---CALL load_doc(1, 'ia_articulo.txt');
-
+--Uso de funcion
 begin
   xml_producte(1);
 end;
@@ -111,40 +109,6 @@ create table DocumentsXML(
     xml_data XMLType
 )XMLTYPE xml_data STORE AS BASICFILE BINARY XML;
 /
-
-
---Implementar consultes amb XQuery per:
---Obtenir imatges de productes amb format específic
-SELECT x.*
-FROM DocumentsXML d,
-     XMLTABLE(
-       '/producte/imatges/imatge[@format_imatge="png"]'
-       PASSING d.xml_data
-       COLUMNS
-         producte_id     NUMBER       PATH '@producte_id',
-         descripcio      VARCHAR2(250) PATH '@descripcio_imatge',
-         format_imatge   VARCHAR2(250) PATH '@format_imatge'
-     ) x;
-     
-SELECT x.*
-FROM DocumentsXML d,
-     XMLTABLE(
-       '/producte/imatges/imatge[@format_imatge="jpg"]'
-       PASSING d.xml_data
-       COLUMNS
-         producte_id     NUMBER       PATH '@producte_id',
-         descripcio      VARCHAR2(250) PATH '@descripcio_imatge',
-         format_imatge   VARCHAR2(250) PATH '@format_imatge'
-     ) x;
-
---Llistar productes amb més d'una imatge
-SELECT id
-FROM DocumentsXML d
-WHERE XMLExists(
-  'count(/producte/imatges/imatge) > 1'
-  PASSING d.xml_data
-);
-
 
 --Inserciones para probar las tablas: 
 CREATE OR REPLACE DIRECTORY DOCS_DIR AS '/home/oracle/Documents';
@@ -212,4 +176,39 @@ INSERT INTO DocumentsXML (id, xml_data)
 VALUES (2, xml_producte(2));
 COMMIT;
 --
+
+--Implementar consultes amb XQuery per:
+--Obtenir imatges de productes amb format específic
+SELECT x.*
+FROM DocumentsXML d,
+     XMLTABLE(
+       '/producte/imatges/imatge[@format_imatge="png"]'
+       PASSING d.xml_data
+       COLUMNS
+         producte_id     NUMBER       PATH '@producte_id',
+         descripcio      VARCHAR2(250) PATH '@descripcio_imatge',
+         format_imatge   VARCHAR2(250) PATH '@format_imatge'
+     ) x;
+     
+SELECT x.*
+FROM DocumentsXML d,
+     XMLTABLE(
+       '/producte/imatges/imatge[@format_imatge="jpg"]'
+       PASSING d.xml_data
+       COLUMNS
+         producte_id     NUMBER       PATH '@producte_id',
+         descripcio      VARCHAR2(250) PATH '@descripcio_imatge',
+         format_imatge   VARCHAR2(250) PATH '@format_imatge'
+     ) x;
+
+--Llistar productes amb més d'una imatge
+SELECT id
+FROM DocumentsXML d
+WHERE XMLExists(
+  'count(/producte/imatges/imatge) > 1'
+  PASSING d.xml_data
+);
+
+
+
 

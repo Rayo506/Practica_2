@@ -128,11 +128,11 @@ if __name__ == "__main__":
 
     # Cargar imagen
     cargar_img_audio('.jpg', './imatge1.jpg', 3, 'Imatge del producte A', 'jpg')
-    cargar_img_audio('.png', './imatge2.png', 4, 'Imatge del producte B', 'png')
+    cargar_img_audio('.png', './imatge2.png', 4, 'Imatge del producte B', 'jpg')
 
     # Cargar audio
     cargar_img_audio('.mp3', './audio1.mp3', 3)
-    cargar_img_audio('.mov', './audio2.mov', 4)
+    cargar_img_audio('.mov', './audio2.mp3', 4)
 
     # Guardar XMLs
     guardar_xml(3)
