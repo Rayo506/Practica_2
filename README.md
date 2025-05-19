@@ -13,9 +13,9 @@ Errores humanos al introducir el timepo del audio, solo entran numeros sin decim
 
 ## Esquema Practica 2
 ### Exercici 1
-Control_coherencias.sql
+Control_coherencias.sql y 
 verifica_logs.py
 
 ### Exercici 2
-Gestio_continguts.sql
+Gestio_continguts.sql y
 multimedia_tools.py
