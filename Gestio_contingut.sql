@@ -19,7 +19,7 @@ emmagatzemar documents XML.
 • Llistar productes amb més d'una imatge
 */
 
---Crear la taula ImatgesProducte(producte_id, descripcio, imatge BLOB, format)
+--La taula ImatgesProducte(producte_id, descripcio, imatge BLOB, format)
 create table ImatgesProducte(
 producte_id number primary key,
 descripcio varchar2(250),
@@ -27,7 +27,7 @@ imatge BLOB DEFAULT EMPTY_BLOB(),
 format varchar2(250)
 );
 /
---Crear la taula AudiosComanda(comanda_id, audio BLOB,durada_segons).
+--La taula AudiosComanda(comanda_id, audio BLOB,durada_segons).
 create table AudiosComanda(
 comanda_id number primary key,
 audio BLOB DEFAULT EMPTY_BLOB(),
@@ -80,18 +80,19 @@ EXCEPTION
 END xml_producte;
 /
 
---Crear una taula DocumentsXML(id, xml_data XMLType) per emmagatzemar documents XML
+-- Crear una taula DocumentsXML(id, xml_data XMLType) per emmagatzemar documents XML
 create table DocumentsXML(
     id number primary key,
     xml_data XMLType
 )XMLTYPE xml_data STORE AS BASICFILE BINARY XML;
 /
 
---Inserciones para probar las tablas: 
+--Inserts
+--Ruta 
 CREATE OR REPLACE DIRECTORY DOCS_DIR AS '/home/oracle/Documents';
 GRANT READ ON DIRECTORY DOCS_DIR TO PUBLIC;
 /
---inserts ImatgesProducte
+--Inserts ImatgesProducte
 DECLARE
   v_bfile BFILE;
   v_blob  BLOB;
@@ -118,7 +119,7 @@ BEGIN
   COMMIT;
 END;
 /
---inserts AudiosComanda
+--Inserts AudiosComanda
 DECLARE
   v_bfile BFILE;
   v_blob  BLOB;
@@ -145,7 +146,7 @@ BEGIN
   COMMIT;
 END;
 /
---XML
+--XML meidnate funcion
 INSERT INTO DocumentsXML (id, xml_data)
 VALUES (1, xml_producte(1));
 
@@ -175,6 +176,7 @@ WHERE XMLExists(
   PASSING d.xml_data
 );
 /
+
 --drop table DocumentsXML;
 --drop table AudiosComanda;
 --drop table ImatgesProducte;
