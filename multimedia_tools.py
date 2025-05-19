@@ -10,36 +10,46 @@
 # i indicar clarament si les validacions han estat correctes.
 import cx_Oracle
 import os
+import sys
 
 # Configuració de la connexió a la base de dades Oracle
 DB_USER = "SYSTEM"
 DB_PASS = "oracle"
 DB_DSN  = "192.168.56.2/FREEPDB1"
 
-def cargar_img_audio(extension, ruta, id, descripcio='', format=''):
+def obtenir_connexio():
     
+    #Intenta establir una connexió amb la base de dades Oracle.
+    #En cas d'error, mostra missatge i surt del programa.
+    
+    try:
+        conn = cx_Oracle.connect(DB_USER, DB_PASS, DB_DSN)
+        return conn
+    except cx_Oracle.Error as e:
+        print(f"[ERROR] No s'ha pogut connectar a la base de dades: {e}")
+        print("Comprova les credencials o la configuració de connexió.")
+        sys.exit(1)
+
+def cargar_img_audio(extension, ruta, id, descripcio='', format=''):
+
     #Carrega un fitxer (imatge o àudio) des del sistema de fitxers i el desa a la base de dades
     #com a BLOB a la taula corresponent segons l'extensió.
     
-    conn = None
+    conn = obtenir_connexio()
     cursor = None
     try:
-        conn = cx_Oracle.connect(DB_USER, DB_PASS, DB_DSN)
         cursor = conn.cursor()
 
-        # Verifica que el fitxer existeix
         if not os.path.exists(ruta):
             print(f"Archivo no encontrado: {ruta}")
             return
 
-        # Llegeix el fitxer binari complet
         with open(ruta, 'rb') as f:
             blob_data = f.read()
 
         file_size = len(blob_data)
         print(f"Cargando archivo: {ruta} ({file_size} bytes)")
 
-        # Insereix imatges a la taula ImatgesProducte
         if extension.lower() in ['.jpg', '.png']:
             cursor.execute("""
                 INSERT INTO ImatgesProducte (producte_id, descripcio, imatge, format)
@@ -47,7 +57,6 @@ def cargar_img_audio(extension, ruta, id, descripcio='', format=''):
             """, (id, descripcio, blob_data, format))
             print("Imagen guardada correctamente en ImatgesProducte.")
 
-        # Insereix àudios a la taula AudiosComanda
         elif extension.lower() in ['.mp3', '.mov']:
             durada = int(input(f"Introduce duración (segundos) para el audio {ruta}: "))
             cursor.execute("""
@@ -67,19 +76,17 @@ def cargar_img_audio(extension, ruta, id, descripcio='', format=''):
     finally:
         if cursor:
             cursor.close()
-        if conn:
-            conn.close()
+        conn.close()
 
-def guardar_xml(producte_id):    
+def guardar_xml(producte_id):
+    
     #Desa un document XML generat per la funció PL/SQL `xml_producte` a la taula DocumentsXML.
     
-    conn = None
+    conn = obtenir_connexio()
     cursor = None
     try:
-        conn = cx_Oracle.connect(DB_USER, DB_PASS, DB_DSN)
         cursor = conn.cursor()
 
-        # Executa la funció PL/SQL xml_producte i desa el resultat XML
         cursor.execute("""
             INSERT INTO DocumentsXML (id, xml_data)
             VALUES (:1, xml_producte(:2))
@@ -92,8 +99,7 @@ def guardar_xml(producte_id):
     finally:
         if cursor:
             cursor.close()
-        if conn:
-            conn.close()
+        conn.close()
 
 def consultar_xquery():
     
@@ -102,15 +108,13 @@ def consultar_xquery():
     #- Llista productes amb més d'una imatge
     #- Mostra un resum de mida de fitxers (imatges i àudios)
     
-    conn = None
+    conn = obtenir_connexio()
     cursor = None
     try:
-        conn = cx_Oracle.connect(DB_USER, DB_PASS, DB_DSN)
         cursor = conn.cursor()
 
         print("\n--- Consultes XQuery ---")
 
-        # Consulta 1: Obté totes les imatges amb format JPG des de XML
         print("Imatges amb format JPG:")
         cursor.execute("""
             SELECT id, extractValue(value(t), '/imatge/@format_imatge')
@@ -122,7 +126,6 @@ def consultar_xquery():
         for row in cursor:
             print(row)
 
-        # Consulta 2: Productes amb més d'una imatge
         print("\nProductes amb més d'una imatge:")
         cursor.execute("""
             SELECT id
@@ -133,8 +136,6 @@ def consultar_xquery():
             print(f"Producte ID: {row[0]}")
 
         print("\n--- Mida dels fitxers desats ---")
-
-        # Consulta 3: Mida total de fitxers imatge
         cursor.execute("""
             SELECT COUNT(*), NVL(SUM(DBMS_LOB.getlength(imatge)), 0)
             FROM ImatgesProducte
@@ -142,7 +143,6 @@ def consultar_xquery():
         img_count, img_size = cursor.fetchone()
         print(f"ImatgesProducte - Total: {img_count} fitxers, Mida total: {img_size} bytes")
 
-        # Consulta 4: Mida total de fitxers àudio
         cursor.execute("""
             SELECT COUNT(*), NVL(SUM(DBMS_LOB.getlength(audio)), 0)
             FROM AudiosComanda
@@ -150,7 +150,6 @@ def consultar_xquery():
         audio_count, audio_size = cursor.fetchone()
         print(f"AudiosComanda - Total: {audio_count} fitxers, Mida total: {audio_size} bytes")
 
-        # Resum general
         total_files = img_count + audio_count
         total_size = img_size + audio_size
         print(f"\nResum total: {total_files} fitxers, {total_size} bytes")
@@ -160,8 +159,7 @@ def consultar_xquery():
     finally:
         if cursor:
             cursor.close()
-        if conn:
-            conn.close()
+        conn.close()
 
 # Programa principal
 if __name__ == "__main__":
