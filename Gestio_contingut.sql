@@ -31,7 +31,7 @@ format varchar2(250)
 create table AudiosComanda(
 comanda_id number primary key,
 audio BLOB DEFAULT EMPTY_BLOB(),
-durada_segons number(2)
+durada_segons number
 );
 /
 
