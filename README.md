@@ -1,4 +1,5 @@
 # Tener en cuenta
+Todos los documentos en el mismo sitio
 Cuando vayas a ejecutar el sql no hace falta ejecutar todo de golpe
 En caso de querer probar los inserts de ejemplo
 	Descarga toda la carpeta donde se encuentran las imagenes 
