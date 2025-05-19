@@ -35,23 +35,7 @@ durada_segons number(2)
 );
 /
 
---Crear una funció xml_producte(producte_id) que generi un document XML amb les dades del producte i referències a les imatges relacionades
-Create or replace procedure xml_producte (producte_id in number) as
- v_file BFILE;
- v_clo CLOB;
-BEGIN
- v_file := BFILENAME('DOCS_DIR', 'xml_dades');
- if dbms_lob.fileexists(v_file) = 1 Then
-    select contenido into v_clo from DocumentsXML where id = producte_id for update;
-    dbms_lob.open(v_file, dbms_lob.lob_readonly);
-    dbms_lob.loadfromfile(v_clo, v_file, dbms_lob.getlength(v_file));
-    dbms_lob.close(v_file);
- end if;
-end;
-/
-
-/*drop procedure xml_producte;*/
-
+--Funció xml_producte(producte_id) que generi un document XML amb les dades del producte i referències a les imatges relacionades
 CREATE OR REPLACE FUNCTION xml_producte(p_producte_id IN NUMBER) RETURN XMLType IS
   v_xml XMLType;
   v_count NUMBER;
@@ -96,13 +80,6 @@ EXCEPTION
 END xml_producte;
 /
 
---Uso de funcion
-begin
-  xml_producte(1);
-end;
-
-SELECT xml_producte(1) FROM dual;
-
 --Crear una taula DocumentsXML(id, xml_data XMLType) per emmagatzemar documents XML
 create table DocumentsXML(
     id number primary key,
@@ -113,7 +90,7 @@ create table DocumentsXML(
 --Inserciones para probar las tablas: 
 CREATE OR REPLACE DIRECTORY DOCS_DIR AS '/home/oracle/Documents';
 GRANT READ ON DIRECTORY DOCS_DIR TO PUBLIC;
-
+/
 --inserts ImatgesProducte
 DECLARE
   v_bfile BFILE;
@@ -121,10 +98,10 @@ DECLARE
 BEGIN
   -- Producto 1
   INSERT INTO ImatgesProducte (producte_id, descripcio, imatge, format)
-  VALUES (1, 'Imatge de producte 1', EMPTY_BLOB(), 'png')
+  VALUES (1, 'Imatge de producte 1', EMPTY_BLOB(), 'jpg')
   RETURNING imatge INTO v_blob;
 
-  v_bfile := BFILENAME('DOCS_DIR', 'imatge1.png');
+  v_bfile := BFILENAME('DOCS_DIR', 'imagen1.jpg');
   dbms_lob.fileopen(v_bfile, dbms_lob.file_readonly);
   dbms_lob.loadfromfile(v_blob, v_bfile, dbms_lob.getlength(v_bfile));
   dbms_lob.fileclose(v_bfile);
@@ -134,7 +111,7 @@ BEGIN
   VALUES (2, 'Imatge de producte 2', EMPTY_BLOB(), 'jpg')
   RETURNING imatge INTO v_blob;
 
-  v_bfile := BFILENAME('DOCS_DIR', 'imatge2.jpg');
+  v_bfile := BFILENAME('DOCS_DIR', 'imagen2.jpg');
   dbms_lob.fileopen(v_bfile, dbms_lob.file_readonly);
   dbms_lob.loadfromfile(v_blob, v_bfile, dbms_lob.getlength(v_bfile));
   dbms_lob.fileclose(v_bfile);
@@ -161,7 +138,7 @@ BEGIN
   VALUES (2, EMPTY_BLOB(), 25)
   RETURNING audio INTO v_blob;
 
-  v_bfile := BFILENAME('DOCS_DIR', 'audio2.wav');
+  v_bfile := BFILENAME('DOCS_DIR', 'audio2.mp3');
   dbms_lob.fileopen(v_bfile, dbms_lob.file_readonly);
   dbms_lob.loadfromfile(v_blob, v_bfile, dbms_lob.getlength(v_bfile));
   dbms_lob.fileclose(v_bfile);
@@ -175,21 +152,10 @@ VALUES (1, xml_producte(1));
 INSERT INTO DocumentsXML (id, xml_data)
 VALUES (2, xml_producte(2));
 COMMIT;
---
+/
 
 --Implementar consultes amb XQuery per:
---Obtenir imatges de productes amb format específic
-SELECT x.*
-FROM DocumentsXML d,
-     XMLTABLE(
-       '/producte/imatges/imatge[@format_imatge="png"]'
-       PASSING d.xml_data
-       COLUMNS
-         producte_id     NUMBER       PATH '@producte_id',
-         descripcio      VARCHAR2(250) PATH '@descripcio_imatge',
-         format_imatge   VARCHAR2(250) PATH '@format_imatge'
-     ) x;
-     
+--Obtenir imatges de productes amb format específic en este caso jpg
 SELECT x.*
 FROM DocumentsXML d,
      XMLTABLE(
@@ -200,7 +166,7 @@ FROM DocumentsXML d,
          descripcio      VARCHAR2(250) PATH '@descripcio_imatge',
          format_imatge   VARCHAR2(250) PATH '@format_imatge'
      ) x;
-
+/
 --Llistar productes amb més d'una imatge
 SELECT id
 FROM DocumentsXML d
@@ -208,6 +174,10 @@ WHERE XMLExists(
   'count(/producte/imatges/imatge) > 1'
   PASSING d.xml_data
 );
+/
+--drop table DocumentsXML;
+--drop table AudiosComanda;
+--drop table ImatgesProducte;
 
 
 
