@@ -11,11 +11,11 @@ En caso de no poder utilizar el codigo de py de los dos casos modifica las varia
 ## No contempla
 Errores humanos al introducir el timepo del audio, solo entran numeros sin decimales y sin ser negativos o letras.
 
-###Esquema Practica 2
-##Exercici 1
+## Esquema Practica 2
+### Exercici 1
 Control_coherencias.sql
 verifica_logs.py
 
-##Exercici 2
+### Exercici 2
 Gestio_continguts.sql
 multimedia_tools.py
