@@ -93,12 +93,13 @@ def consultar_xquery():
         conn = cx_Oracle.connect(DB_USER, DB_PASS, DB_DSN)
         cursor = conn.cursor()
 
-        print("\nImatges amb format PNG:")
+        print("\n--- Consultes XQuery ---")
+        print("Imatges amb format JPG:")
         cursor.execute("""
             SELECT id, extractValue(value(t), '/imatge/@format_imatge')
             FROM DocumentsXML d,
                  TABLE(XMLSequence(
-                     EXTRACT(d.xml_data, '/producte/imatges/imatge[@format_imatge="png"]')
+                     EXTRACT(d.xml_data, '/producte/imatges/imatge[@format_imatge="jpg"]')
                  )) t
         """)
         for row in cursor:
@@ -112,6 +113,27 @@ def consultar_xquery():
         """)
         for row in cursor:
             print(f"Producte ID: {row[0]}")
+
+        print("\n--- Mida dels fitxers desats ---")
+        # Tamaño de imágenes
+        cursor.execute("""
+            SELECT COUNT(*), NVL(SUM(DBMS_LOB.getlength(imatge)), 0)
+            FROM ImatgesProducte
+        """)
+        img_count, img_size = cursor.fetchone()
+        print(f"ImatgesProducte - Total: {img_count} fitxers, Mida total: {img_size} bytes")
+
+        # Tamaño de audios
+        cursor.execute("""
+            SELECT COUNT(*), NVL(SUM(DBMS_LOB.getlength(audio)), 0)
+            FROM AudiosComanda
+        """)
+        audio_count, audio_size = cursor.fetchone()
+        print(f"AudiosComanda - Total: {audio_count} fitxers, Mida total: {audio_size} bytes")
+
+        total_files = img_count + audio_count
+        total_size = img_size + audio_size
+        print(f"\nResum total: {total_files} fitxers, {total_size} bytes")
 
     except cx_Oracle.Error as e:
         print(f"Error XQuery: {e}")
@@ -127,12 +149,12 @@ if __name__ == "__main__":
     print("Iniciant càrrega multimedia...")
 
     # Cargar imagen
-    cargar_img_audio('.jpg', './imatge1.jpg', 3, 'Imatge del producte A', 'jpg')
-    cargar_img_audio('.png', './imatge2.png', 4, 'Imatge del producte B', 'jpg')
+    cargar_img_audio('.jpg', 'imagen1.jpg', 3, 'Imatge del producte A', 'jpg')
+    cargar_img_audio('.jpg', 'imagen2.jpg', 4, 'Imatge del producte B', 'jpg')
 
     # Cargar audio
-    cargar_img_audio('.mp3', './audio1.mp3', 3)
-    cargar_img_audio('.mov', './audio2.mp3', 4)
+    cargar_img_audio('.mp3', 'audio1.mp3', 3)
+    cargar_img_audio('.mp3', 'audio2.mp3', 4)
 
     # Guardar XMLs
     guardar_xml(3)
