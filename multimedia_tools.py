@@ -1,4 +1,4 @@
-#6. Desenvolupar el script multimedia_tools.py que:
+# Desenvolupar el script multimedia_tools.py que:
 #• Carrega imatges (.jpg) i àudios (.mp3) des del sistema de fitxers.
 #• Desa els fitxers com a BLOB a les respectives taules.
 #• Desa documents XML a la taula DocumentsXML. ==> MEDIANTE EL PROCESO
